@@ -13,13 +13,6 @@ sys.path.append('../')
 from Protocol.FieldType import Field
 
 
-# def get_pub_keys():
-#     pub_key_by_mixer_addr = {}  # key - addr, value - PubKey(from pyNacl)
-#     for mixer in get_all_servers():
-#         response = requests.get(f"{mixer}/public-key")
-#         pub_key_by_mixer_addr[mixer] = unpack_pub_k(response.json()['public_key'])
-#     return pub_key_by_mixer_addr
-
 
 def multiple_encrypt(message_from_user: str, route: list, conn_manager, uid, key_manager):
     node_pub_keys = get_pub_keys(route[:-1], conn_manager)
