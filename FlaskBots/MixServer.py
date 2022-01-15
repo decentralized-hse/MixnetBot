@@ -94,7 +94,7 @@ def register_new_user():
     return "OK", 200
 
 
-@app.route("/new-node-notification", methods=['POST'])
+@app.route("/new-node-notification", methods=['GET', 'POST'])
 def add_new():
     print("ADD NEW NOTIFICATION--------------------------------------------------------")
     for server in request.json["servers"]:

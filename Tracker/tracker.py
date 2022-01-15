@@ -28,15 +28,16 @@ def register():
     # print(a, p)
     # print("DATA", request.json)
     mixer_port = request.json["port"]
+    notify_all_nodes()
     mixers.add(f"{address}:{mixer_port}")
     # [requests.get(f"{mixer}/new-node-notification") for mixer in mixers]
-    notify_all_nodes()
     print("MIXERS:", mixers)
     return "OK", 200
 
 
 def notify_all_nodes():
     for mixer in mixers:
+        print(mixers)
         url = f"{mixer}/new-node-notification"
         print(f"SENDING {url} ALL DATA")
         # requests.post(url=url,
