@@ -34,6 +34,7 @@ class ConnectionManager:
                     pub_k = unpack_pub_k(response.json()['public_key'])
                     self.connections[mixer] = ConnectionInfo(last_online_dt=datetime.datetime.now(),
                                                              pub_k=pub_k)
+                    print("PING SUCCESS", mixer)
                     time.sleep(1)
                 except requests.exceptions.RequestException:
                     pass  # TODO log

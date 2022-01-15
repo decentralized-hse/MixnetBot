@@ -23,10 +23,10 @@ message_queue = MessageQueue(connection_manager)
 
 print("PUBLIC KEY", PUBLIC_KEY.__bytes__())
 
-# import logging
-#
-# log = logging.getLogger('werkzeug')
-# log.setLevel(logging.ERROR)
+import logging
+
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 
 @app.route("/public-key", methods=['GET'])
@@ -93,6 +93,13 @@ def register_new_user():
             message_queue.append_message(MessageTask(url=server + "/user", data=message_obj))
     return "OK", 200
 
+
+@app.route("/new-node-notification", methods=['GET'])
+def update_mixer_list():
+    resp = requests.get("http://127.0.0.1:5000/get-mixers")
+    print(resp.json())
+
+    return "OK", 200
 
 xport = None
 if __name__ == '__main__':

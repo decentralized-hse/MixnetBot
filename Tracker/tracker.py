@@ -1,3 +1,7 @@
+from threading import Thread
+
+import requests
+
 from flask import Flask
 from flask import request
 
@@ -23,10 +27,25 @@ def register():
     p = request.environ['REMOTE_PORT']
     # print(a, p)
     # print("DATA", request.json)
+    http = "http://"
+    addr = http + request.remote_addr
     mixer_port = request.json["port"]
-    mixers.add(f"{request.remote_addr}:{mixer_port}")
+    mixers.add(f"{addr}:{mixer_port}")
+    print("ADDED MIXER ------------------------")
+    t = Thread(target=notify_all_nodes, daemon=True)
+    t.start()
+    # notify_all_nodes()
+
+
+
     print("MIXERS:", mixers)
     return "OK", 200
+
+
+def notify_all_nodes():
+    for mixer in mixers:
+        print(f"SEND DATA TO {mixer}")
+        requests.get(f"{mixer}/new-node-notification")
 
 
 if __name__ == '__main__':
