@@ -94,7 +94,7 @@ def register_new_user():
     return "OK", 200
 
 
-@app.route("/new-node-notification", methods=['POST'])
+@app.route("/new-node-notification", methods=['GET', 'POST'])
 def add_new():
     print("ADD NEW NOTIFICATION--------------------------------------------------------")
     connection_manager.update_connection_list(request.json["servers"])
