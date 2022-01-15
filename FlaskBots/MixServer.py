@@ -97,8 +97,9 @@ def register_new_user():
 @app.route("/new-node-notification", methods=['POST'])
 def add_new():
     print("ADD NEW NOTIFICATION--------------------------------------------------------")
-    for server in request.json["servers"]:
-        connection_manager.add_connection(server)
+    connection_manager.update_connection_list(request.json["servers"])
+    print("ALL CONNECTIONS", connection_manager.connections.keys())
+    return "OK", 200
 
 
 xport = None

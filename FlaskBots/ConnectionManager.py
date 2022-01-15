@@ -29,7 +29,7 @@ class ConnectionManager:
     def ping_online_servers(self):
         print(self.connections)
         while True:
-            for mixer in self.connections.keys():
+            for mixer in list(self.connections.keys()):
                 try:
                     # print("BEFORE PING ----------------------------------", datetime.datetime.now())
                     # print(mixer, "_---------------____________________")
@@ -62,6 +62,10 @@ class ConnectionManager:
     def get_all_servers(self):
         return [ServerInfo(addr, info.last_online_dt, info.pub_k)
                 for addr, info in self.connections.items()]
+
+    def update_connection_list(self, servers):
+        for server in servers:
+            self.add_connection(server)
 
     def add_connection(self, server):
         if server not in self.connections.keys():
