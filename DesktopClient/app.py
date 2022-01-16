@@ -72,14 +72,6 @@ class MixerMessenger:
         # self.chat_cell.add_item(message)
         self.input.clear()
 
-    #
-    # def register_and_generate_keys(self, nickname):
-    #     try:
-    #         generate_and_save_keys(nickname)
-    #         self.master.show_message_popup("DONE", 'Keys generated')
-    #     except FileExistsError:
-    #         self.master.show_warning_popup("Warning", 'Keys are already generated')
-
     def show_name_text_box(self):
         self.master.show_text_box_popup('Please enter your name', self.register_and_generate_keys)
 
@@ -87,14 +79,6 @@ class MixerMessenger:
         text = "!!!"
         self.master.show_message_popup("PUBLIC KEY", text)
 
-    # def quit_cui(self, to_quit):
-    #     if to_quit:
-    #         exit()
-    #     else:
-    #         self.master.show_message_popup('Cancelled', 'The quit operation was cancelled.')
-    #
-
-    #
     def show_add_pub_k_text_box(self):
         self.master.show_text_box_popup('Please enter receiver pub k', self.show_add_username_text_box)
 
@@ -111,10 +95,20 @@ class MixerMessenger:
         self.show_chat_list()
 
     def show_chat_list(self):
+        """returns bool [is list updated]"""
+        self.show_chat(silent=True)
+        all_chats = self.app.get_chat_list()
+        all_chats_names = set(x.name for x in all_chats)
+        existed_names = set(x.name for x in self.chats_scroll_cell.get_item_list())
+        if all_chats_names == existed_names:
+            return False
+        cur_chat = self.chats_scroll_cell.get()
         self.chats_scroll_cell.clear()
-        # self.chats_scroll_cell.add_item("---")
-        for chat in self.app.get_chat_list():
+        for chat in all_chats:
             self.chats_scroll_cell.add_item(chat)
+        self.chats_scroll_cell.set_selected(cur_chat)
+        return True
+        # self.chats_scroll_cell.set_selected(cur_chat)
 
     #
     # def reset_title(self, new_title):
@@ -133,8 +127,8 @@ class MixerMessenger:
     def background_update(self):
         while True:
             cur_chat = self.chats_scroll_cell.get()
-            self.show_chat_list()
-            self.show_chat(silent=True)
+            chat_list_updated = self.show_chat_list()
+            # self.show_chat(silent=True)
             # updated_chats, _ = get_updates()
             # self.add_new_chats_from_updates(updated_chats)
             # cur_chat = self.chats_scroll_cell.get()
