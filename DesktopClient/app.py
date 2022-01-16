@@ -54,7 +54,7 @@ class MixerMessenger:
         messages = self.app.get_chat(user)
         for m in messages:
             if m.direction == "outgoing":
-                self.chat_cell.add_item(f"              {m.text}")
+                self.chat_cell.add_item(f"                                               {m.text}")
             else:
                 self.chat_cell.add_item(m.text)
 

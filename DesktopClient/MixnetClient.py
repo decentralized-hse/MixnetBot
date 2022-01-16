@@ -41,6 +41,7 @@ class MixnetClient:
                                    uid, direction=MessageDirection.outgoing)
 
     def build_route(self, recv_pub_k):
+        print("BUILD ROUTE", datetime.datetime.now())
         return [s.addr for s in self.conn_manager.get_online_servers()] + [recv_pub_k]
 
     def add_user(self, name, pub_k):

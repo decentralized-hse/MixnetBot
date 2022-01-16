@@ -23,10 +23,10 @@ message_queue = MessageQueue(connection_manager)
 
 print("PUBLIC KEY", PUBLIC_KEY.__bytes__())
 
-# import logging
-#
-# log = logging.getLogger('werkzeug')
-# log.setLevel(logging.ERROR)
+import logging
+
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 
 @app.route("/public-key", methods=['GET'])
@@ -91,6 +91,14 @@ def register_new_user():
     if success:
         for server in get_all_servers():
             message_queue.append_message(MessageTask(url=server + "/user", data=message_obj))
+    return "OK", 200
+
+
+@app.route("/new-node-notification", methods=['GET', 'POST'])
+def add_new():
+    print("ADD NEW NOTIFICATION--------------------------------------------------------")
+    connection_manager.update_connection_list(request.json["servers"])
+    print("ALL CONNECTIONS", connection_manager.connections.keys())
     return "OK", 200
 
 
