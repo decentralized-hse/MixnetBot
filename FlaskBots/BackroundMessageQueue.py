@@ -15,7 +15,7 @@ class MessageTask:
             requests.post(url=self.url, data=self.data)
         except ConnectionError:
             pass
-            # TODO log it
+            # TODO add to queue again. But make an attempt only n times
 
 
 class MessageQueue:
