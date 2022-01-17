@@ -17,7 +17,6 @@ from MixnetClient import send, get_update_request_message
 # print(private_key)
 # print("-------------")
 # print(public_key)
-from FlaskBots.Network import get_all_servers
 from Protocol.FieldType import Field
 from Protocol.UpdateRequest import UpdateReq
 from utils.coding import unpack_obj, pack_k, pack_obj, unpack_str

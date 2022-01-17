@@ -6,7 +6,6 @@ import requests
 from datetime import datetime
 from nacl.public import SealedBox, Box
 
-from FlaskBots.Network import get_all_servers
 from utils.coding import base64_str_to_public_key, bytes_to_b64, unpack_pub_k, pack_obj, pack_k, pack_str
 
 sys.path.append('../')

@@ -25,7 +25,7 @@ def save_to_file(servers):
 FILENAME = 'mixers.json'
 app = Flask(__name__)
 PORTS = [8000, 9000, 10000]
-default_mixers = [f"http://127.0.0.1:{port}" for port in PORTS]
+# default_mixers = [f"http://127.0.0.1:{port}" for port in PORTS]
 mixers = set(
     get_server_list_from_file())  # TODO перевести на List и убедиться что повторений нет. TODO 2: энергонезависимый кэш
 

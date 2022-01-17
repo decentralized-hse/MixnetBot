@@ -1,4 +1,5 @@
 import datetime
+import os
 import time
 from collections import namedtuple
 from threading import Thread
@@ -6,18 +7,19 @@ import sys
 
 sys.path.append('../')
 import requests
+from dotenv import load_dotenv
 
-from FlaskBots.Network import get_all_servers
 from utils.coding import unpack_pub_k
 
 ServerInfo = namedtuple('ServerInfo', ['addr', 'last_online_dt', 'pub_k'])
+load_dotenv()
 
 
 class ConnectionManager:
     def __init__(self, is_server):
         self.connections = {}  # TODO энергонезависимый кэш
         self.is_server = is_server
-        for server in get_all_servers():
+        for server in self.get_all_servers_from_tracker():
             self.connections[server] = ConnectionInfo(datetime.datetime(1980, 1, 1), None)
 
     def start(self):
@@ -70,6 +72,13 @@ class ConnectionManager:
     def add_connection(self, server):
         if server not in self.connections.keys():
             self.connections[server] = ConnectionInfo(datetime.datetime(1980, 1, 1), None)
+
+    def get_all_servers_from_tracker(self):
+        # TODO сделать энергонезавсимый кэш в ConnectionManager
+        tracker_url = os.getenv('TRACKER_GET_MIXERS_URL')
+        response = requests.get(url=tracker_url)
+        print("In get all servers", response.json())
+        return response.json()["servers"]
 
 
 def is_online(last_online_dt):

@@ -1,15 +1,15 @@
 import argparse
 import json
+import os
 from threading import Thread
 
 import requests
 from flask import Flask
 from flask import request
-
+from dotenv import load_dotenv
 from DesktopClient.multiple_encryption import get_pub_keys
 from FlaskBots.BackroundMessageQueue import MessageQueue, MessageTask
 from FlaskBots.ConnectionManager import ConnectionManager
-from FlaskBots.Network import get_all_servers
 from FlaskBots.db.DB import DB
 from Protocol.FieldType import Field
 from Protocol.UpdateRequest import UpdateReq
@@ -82,18 +82,6 @@ def get_all_messages():
     #                 pub_k=unpack_pub_k(pub_k))
 
 
-@app.route("/user", methods=['POST'])
-def register_new_user():
-    message_obj = get_json_dict(request)
-    pub_k = message_obj[Field.sender_public_key]
-    nickname = message_obj[Field.sender_nickname]
-    success = db.user_repo.add_user(pub_k, nickname)
-    if success:
-        for server in get_all_servers():
-            message_queue.append_message(MessageTask(url=server + "/user", data=message_obj))
-    return "OK", 200
-
-
 @app.route("/new-node-notification", methods=['GET', 'POST'])
 def add_new():
     print("ADD NEW NOTIFICATION--------------------------------------------------------")
@@ -104,6 +92,7 @@ def add_new():
 
 xport = None
 if __name__ == '__main__':
+    load_dotenv()
     q_thread = Thread(target=message_queue.send_mixed, daemon=True)
     q_thread.start()
 
@@ -112,5 +101,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     db.connect(args.xport)
     xport = args.xport
-    response = requests.get(url="http://127.0.0.1:5000/register", json={"port": xport})
+    # TODO обработать случай когда трекер не запущен
+    response = requests.get(url=os.getenv('TRACKER_REGISTER_URL'), json={"port": xport})
     app.run(port=args.xport, debug=True)
