@@ -7,7 +7,6 @@ import requests
 from flask import Flask
 from flask import request
 from dotenv import load_dotenv
-from DesktopClient.multiple_encryption import get_pub_keys
 from FlaskBots.BackroundMessageQueue import MessageQueue, MessageTask
 from FlaskBots.ConnectionManager import ConnectionManager
 from FlaskBots.db.DB import DB
