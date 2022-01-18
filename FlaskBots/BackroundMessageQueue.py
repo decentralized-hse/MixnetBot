@@ -1,5 +1,8 @@
 import random
 import json
+import sys
+
+sys.path.append('../')
 import requests
 import time
 from Protocol.FieldType import Field

@@ -1,4 +1,6 @@
 import argparse
+# import sys
+# sys.path.append('..')
 import json
 import os
 from threading import Thread
@@ -13,12 +15,13 @@ from FlaskBots.db.DB import DB
 from Protocol.FieldType import Field
 from Protocol.UpdateRequest import UpdateReq
 from utils.coding import pack_k, unpack_obj, pack_obj, unpack_pub_k
-from Domain import PUBLIC_KEY, PRIVATE_KEY, get_json_dict, get_updates_for_user
+from FlaskBots.Domain import PUBLIC_KEY, PRIVATE_KEY, get_json_dict, get_updates_for_user
 
 app = Flask(__name__)
 db = DB()
 connection_manager = ConnectionManager(is_server=True).start()
 message_queue = MessageQueue(connection_manager)
+
 
 # print("PUBLIC KEY", PUBLIC_KEY.__bytes__())
 

@@ -13,7 +13,7 @@ class DB:
         self.user_repo = None
 
     def connect(self, port):
-        conn = SqliteDatabase(f'db/db{port}.sqlite')
+        conn = SqliteDatabase(f'FlaskBots/db/db{port}.sqlite')
         conn.connect()
 
         class BaseModel(Model):
