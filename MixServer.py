@@ -105,4 +105,4 @@ if __name__ == '__main__':
     xport = args.xport
     # TODO обработать случай когда трекер не запущен
     response = requests.get(url=os.getenv('TRACKER_REGISTER_URL'), json={"port": xport})
-    app.run(port=args.xport, debug=False)
+    app.run(host='0.0.0.0', port=args.xport, debug=False)
