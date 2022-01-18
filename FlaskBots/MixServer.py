@@ -21,12 +21,12 @@ db = DB()
 connection_manager = ConnectionManager(is_server=True).start()
 message_queue = MessageQueue(connection_manager)
 
-print("PUBLIC KEY", PUBLIC_KEY.__bytes__())
+# print("PUBLIC KEY", PUBLIC_KEY.__bytes__())
 
-import logging
-
-log = logging.getLogger('werkzeug')
-log.setLevel(logging.ERROR)
+# import logging
+#
+# log = logging.getLogger('werkzeug')
+# log.setLevel(logging.ERROR)
 
 
 @app.route("/public-key", methods=['GET'])
@@ -84,9 +84,9 @@ def get_all_messages():
 
 @app.route("/new-node-notification", methods=['GET', 'POST'])
 def add_new():
-    print("ADD NEW NOTIFICATION--------------------------------------------------------")
+    # print("ADD NEW NOTIFICATION--------------------------------------------------------")
     connection_manager.update_connection_list(request.json["servers"])
-    print("ALL CONNECTIONS", connection_manager.connections.keys())
+    # print("ALL CONNECTIONS", connection_manager.connections.keys())
     return "OK", 200
 
 
@@ -103,4 +103,4 @@ if __name__ == '__main__':
     xport = args.xport
     # TODO обработать случай когда трекер не запущен
     response = requests.get(url=os.getenv('TRACKER_REGISTER_URL'), json={"port": xport})
-    app.run(port=args.xport, debug=True)
+    app.run(port=args.xport, debug=False)

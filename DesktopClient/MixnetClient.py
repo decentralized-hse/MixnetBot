@@ -25,7 +25,7 @@ class MixnetClient:
         self.key_manager.try_generate_and_save_keys(nickname="User")
         self.conn_manager = ConnectionManager(is_server=False).start()
         self.update_manager = UpdateManager(self.conn_manager, self.key_manager, self.repo).start()
-        print("Client & Connection manager STARTED")
+        # print("Client & Connection manager STARTED")
         # time.sleep(2)
 
     def send(self, receiver_pub_k, message: str):
@@ -41,7 +41,7 @@ class MixnetClient:
                                    uid, direction=MessageDirection.outgoing)
 
     def build_route(self, recv_pub_k):
-        print("BUILD ROUTE", datetime.datetime.now())
+        # print("BUILD ROUTE", datetime.datetime.now())
         return [s.addr for s in self.conn_manager.get_online_servers()] + [recv_pub_k]
 
     def add_user(self, name, pub_k):

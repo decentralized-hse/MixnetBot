@@ -15,7 +15,7 @@ def get_json_dict(request) -> dict:
 
 
 def get_updates_for_user(update_request: dict, db) -> dict:  # TODO проверять хэши
-    print("GETTING UPDATES", update_request[UpdateReq.last_message_time])
+    # print("GETTING UPDATES", update_request[UpdateReq.last_message_time])
     pub_k = update_request[UpdateReq.sender_public_key]
     all_messages = db.mail_repo.get_messages_by_recv_pub_k_time_ASC(pub_k)
     if update_request[UpdateReq.last_message_time] is None:
