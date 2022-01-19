@@ -1,8 +1,4 @@
-from peewee import SqliteDatabase
 from peewee import *
-
-# from db.MailRepository import MailRepository
-# from db.UserRepository import UserRepository
 from FlaskBots.db.MailRepository import MailRepository
 from FlaskBots.db.UserRepository import UserRepository
 

@@ -1,6 +1,5 @@
 import datetime
 
-from dateutil import parser
 from peewee import *
 import sys
 
@@ -83,11 +82,11 @@ class MailRepository:
     def get_all_senders(self):
         return list(set(m.sender_pub_k for m in Message.select()))
 
-    def get_chat(self, pub_k):  # TODO list(...)
+    def get_chat(self, pub_k):
         return [x for x in Message.select().where(Message.sender_pub_k == pub_k).order_by(Message.timestamp)]
 
 
-class UserRepository:  # TODO попробовать добавить одного пользователя дважды
+class UserRepository:
     def add_user(self, name, pub_k) -> bool:
         """Returns bool [is user inserted]"""
         try:
@@ -96,7 +95,7 @@ class UserRepository:  # TODO попробовать добавить одног
         except IntegrityError:
             return False
 
-    def get_user_by_name(self, name):  # TODO а если такого нет
+    def get_user_by_name(self, name):
         return User.get(User.name == name)
 
     def get_all_users(self):
