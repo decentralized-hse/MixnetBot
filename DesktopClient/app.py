@@ -41,18 +41,18 @@ class MixerMessenger:
         self.show_chat_spec(cur_receiver)
 
     def show_chat_spec(self, cur_receiver):
-        self.chat_cell.clear()
         self.chat_cell.set_title(f"Chat with: {cur_receiver.name}")
-        self.fill_chat(cur_receiver)
-        self.scroll_chat_to_bottom()
-
-    def fill_chat(self, user):
-        messages = self.app.get_chat(user)
+        printed_messages_count = len(self.chat_cell.get_item_list())
+        messages = self.app.get_chat(cur_receiver)
+        if printed_messages_count == len(messages):
+            return
+        self.chat_cell.clear()
         for m in messages:
             if m.direction == "outgoing":
                 self.chat_cell.add_item(m.text.rjust(int(self.master._width * 0.6)))
             else:
                 self.chat_cell.add_item(m.text)
+        self.scroll_chat_to_bottom()
 
     def scroll_chat_to_bottom(self):
         self.chat_cell._jump_to_bottom(self.chat_cell.get_viewport_height())
@@ -69,7 +69,6 @@ class MixerMessenger:
 
     def show_name_text_box(self):
         self.master.show_text_box_popup('Please enter your name', self.register_and_generate_keys)
-
 
     def show_add_pub_k_text_box(self):
         self.master.show_text_box_popup('Please enter receiver pub k', self.show_add_username_text_box)
