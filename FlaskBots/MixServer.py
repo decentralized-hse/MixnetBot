@@ -21,12 +21,12 @@ db = DB()
 connection_manager = ConnectionManager(is_server=True).start()
 message_queue = MessageQueue(connection_manager)
 
-print("PUBLIC KEY", PUBLIC_KEY.__bytes__())
+# print("PUBLIC KEY", PUBLIC_KEY.__bytes__())
 
-import logging
-
-log = logging.getLogger('werkzeug')
-log.setLevel(logging.ERROR)
+# import logging
+#
+# log = logging.getLogger('werkzeug')
+# log.setLevel(logging.ERROR)
 
 
 @app.route("/public-key", methods=['GET'])
@@ -44,14 +44,14 @@ def get_public_key():
 @app.route("/message", methods=['POST'])
 def message():
     message = get_json_dict(request)  # расшифрованное своим приватным ключом
-    print("MES:", message)
+    # print("MES:", message)
     if message.get(Field.is_junk):
         return "OK", 200
     if message[Field.cypher_count] == 1:
         if message.get(Field.type) == "broadcast":
             db.mail_repo.add_message(recv_pub_k=message[Field.to_pub_k], message=json.dumps(message),
                                      timestamp=message[Field.timestamp])
-            print("saved", json.dumps(message))
+            # print("saved", json.dumps(message))
         else:
             send_broadcast(message)
         return "OK", 200
@@ -68,13 +68,13 @@ def send_broadcast(message):
     for mixer in connection_manager.get_online_servers():
         encrypted = pack_obj(message, mixer.pub_k)  # Зашифровали для получателя
         message_queue.append_message(MessageTask(url=mixer.addr + "/message", data=encrypted))
-    print("sent broadcast", message)
+    # print("sent broadcast", message)
 
 
 @app.route("/messages", methods=['GET'])
 def get_all_messages():
     update_request = get_json_dict(request)
-    print("GETTING UPDATES", update_request)
+    # print("GETTING UPDATES", update_request)
     updates = get_updates_for_user(update_request, db)
     client_pub_k = update_request[UpdateReq.sender_public_key]
     return pack_obj(updates, pub_k=unpack_pub_k(client_pub_k))
@@ -84,9 +84,9 @@ def get_all_messages():
 
 @app.route("/new-node-notification", methods=['GET', 'POST'])
 def add_new():
-    print("ADD NEW NOTIFICATION--------------------------------------------------------")
+    # print("ADD NEW NOTIFICATION--------------------------------------------------------")
     connection_manager.update_connection_list(request.json["servers"])
-    print("ALL CONNECTIONS", connection_manager.connections.keys())
+    # print("ALL CONNECTIONS", connection_manager.connections.keys())
     return "OK", 200
 
 

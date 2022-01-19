@@ -29,7 +29,7 @@ class ConnectionManager:
         return self
 
     def ping_online_servers(self):
-        print(self.connections)
+        # print(self.connections)
         while True:
             for mixer in list(self.connections.keys()):
                 try:
@@ -40,11 +40,11 @@ class ConnectionManager:
                     # print(f"{response}---------------------------------------------- PUB_K")
                     self.connections[mixer] = ConnectionInfo(last_online_dt=datetime.datetime.now(),
                                                              pub_k=pub_k)
-                    print("PING SUCCESS", mixer)
+                    # print("PING SUCCESS", mixer)
                     time.sleep(1)
                 except requests.exceptions.RequestException:
-                    # pass
-                    print("Exc in ping")
+                    pass
+                    # print("Exc in ping")
                 # time.sleep(1)
 
     def get_online_servers(self):
@@ -77,7 +77,7 @@ class ConnectionManager:
         # TODO сделать энергонезавсимый кэш в ConnectionManager
         tracker_url = os.getenv('TRACKER_GET_MIXERS_URL')
         response = requests.get(url=tracker_url)
-        print("In get all servers", response.json())
+        # print("In get all servers", response.json())
         return response.json()["servers"]
 
 
