@@ -17,7 +17,8 @@ Deploy:
 Use:
 
 ````
- 1. Clone project
+ 0. Clone project
+ 1. Install requirements
  2. cd DesktopClient
  3. python3 app.py
  4. Enter your name
