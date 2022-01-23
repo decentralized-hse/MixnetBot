@@ -4,29 +4,30 @@ An HTTP-based mixnet.
 
 A course project UrFU IENIM Decentralized systems.
 
-#### Запуск локально:
-0) Удалить из проекта все файлы с разрешением .sqlite (т.к. поменялась структура таблиц) FlaskBots/db & DesktopClient/db
-1) Запустить tracker.py
-2) Запустить сервера. s1.py & s2.py
-3) Запустить app.py
-
-#### Использование:
-1) Добавить чат (+ Chat)
-2) Ввести публичный ключ получателя в виде b'smth'
-3) Для выхода из режима фокуса на каком-то элементе CUI - нажать ESC
-4) Для выхода из приложения - нажать кнопку Q
 
 Deploy:
 
 ````
- // flask, lib etc
+ 0. Clone project
+ 1. Install requirements
+ 2. ufw allow <port you want to host on>
+ 3. python3 MixServer.py --xport=<port from previous step>
 ````
 
 Use:
 
 ````
- // create&publish keys
- // receive the public key
- // send a message
- // receive messages
+ 1. Clone project
+ 2. cd DesktopClient
+ 3. python3 app.py
+ 4. Enter your name
+ 5. Open keys.json, copy pub_k in b'smth' form and publish it
+ 6. Get your friend's Public key
+ 7. Press " + Chat " button
+ 8. Enter your friend's Public Key 
+ 9. Enter name of your friend
+ 10. Write to your friend
+ 11. Press Esc to unfocus from an element of UI
+ 12. Press Q to quit
+ 
 ````
