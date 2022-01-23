@@ -1,8 +1,8 @@
-from nacl.public import PrivateKey, SealedBox
+from nacl.public import PrivateKey
 
 from Protocol.UpdateRequest import UpdateReq
 from Protocol.Updates import Update, UpdateType
-from utils.coding import unpack_obj, get_hash_of_uids
+from utils.coding import unpack_obj
 from dateutil import parser
 
 PRIVATE_KEY = PrivateKey.generate()

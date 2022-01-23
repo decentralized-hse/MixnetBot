@@ -17,7 +17,7 @@ load_dotenv()
 
 class ConnectionManager:
     def __init__(self, is_server):
-        self.connections = {}  # TODO энергонезависимый кэш
+        self.connections = {}
         self.is_server = is_server
         for server in self.get_all_servers_from_tracker():
             self.connections[server] = ConnectionInfo(datetime.datetime(1980, 1, 1), None)
@@ -29,26 +29,18 @@ class ConnectionManager:
         return self
 
     def ping_online_servers(self):
-        # print(self.connections)
         while True:
             for mixer in list(self.connections.keys()):
                 try:
-                    # print("BEFORE PING ----------------------------------", datetime.datetime.now())
-                    # print(mixer, "_---------------____________________")
                     response = requests.get(f"{mixer}/public-key")
                     pub_k = unpack_pub_k(response.json()['public_key'])
-                    # print(f"{response}---------------------------------------------- PUB_K")
                     self.connections[mixer] = ConnectionInfo(last_online_dt=datetime.datetime.now(),
                                                              pub_k=pub_k)
-                    print("PING SUCCESS", mixer)
                     time.sleep(1)
                 except requests.exceptions.RequestException:
                     pass
-                    # print("Exc in ping")
-                # time.sleep(1)
 
     def get_online_servers(self):
-
         res = [s for s in self.get_all_servers() if is_online(s.last_online_dt)]
         if not res:
             raise RuntimeError(f"All servers are offline: {self.get_all_servers()}")
@@ -74,10 +66,8 @@ class ConnectionManager:
             self.connections[server] = ConnectionInfo(datetime.datetime(1980, 1, 1), None)
 
     def get_all_servers_from_tracker(self):
-        # TODO сделать энергонезавсимый кэш в ConnectionManager
         tracker_url = os.getenv('TRACKER_GET_MIXERS_URL')
         response = requests.get(url=tracker_url)
-        # print("In get all servers", response.json())
         return response.json()["servers"]
 
 

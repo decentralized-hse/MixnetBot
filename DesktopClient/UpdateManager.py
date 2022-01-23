@@ -9,11 +9,11 @@ import requests
 
 from DesktopClient.db.MailRepository import MessageDirection
 from Protocol.UpdateRequest import UpdateReq
-from utils.coding import base64_str_to_public_key, unpack_obj, pack_k, pack_obj, unpack_str, unpack_pub_k
+from utils.coding import unpack_obj, pack_k, pack_obj, unpack_str, unpack_pub_k
 
 sys.path.append('../')
 from Protocol.FieldType import Field
-from multiple_encryption import multiple_encrypt, get_pub_keys
+
 
 
 class UpdateManager:
@@ -25,7 +25,6 @@ class UpdateManager:
     def start(self):
         thread = Thread(target=self.background_update, daemon=True)
         thread.start()
-        # time.sleep(3)
         return self
 
     def background_update(self):
@@ -36,7 +35,7 @@ class UpdateManager:
     def get_updates(self, all_messages=False):
         try:
             server = random.choice(self.conn_manager.get_online_servers())
-        except RuntimeError:  # all offline
+        except RuntimeError:
             print("All offline", self.conn_manager.connections)
             return [], []
         upd_request = self.get_update_request_message(all_messages)
@@ -51,14 +50,12 @@ class UpdateManager:
             d = unpack_obj(data=response.text, sk=self.key_manager.sk)
         except:
             return [], []
-            # raise Exception(response.text)
         senders = set()
         messages = []
         for m in d["messages"]:
             encrypted = json.loads(m)
             unp = unpack_obj(encrypted[Field.body], self.key_manager.sk)
             sender_pub_k = unpack_pub_k(unp[Field.sender_pub_k])
-            # TODO Если упало с ошибкой, то сообщение - подделка
             mes = unpack_str(unp[Field.body], self.key_manager.sk, sender_pub_k)
             ts = parser.parse(unp[Field.timestamp])
             self.repo.mail.add_message(unp[Field.sender_pub_k], mes, ts,
