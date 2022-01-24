@@ -36,7 +36,7 @@ class UpdateManager:
         try:
             server = random.choice(self.conn_manager.get_online_servers())
         except RuntimeError:
-            print("All offline", self.conn_manager.connections)
+            # print("All offline", self.conn_manager.connections)
             return [], []
         upd_request = self.get_update_request_message(all_messages)
         try:
