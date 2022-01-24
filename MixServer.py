@@ -37,7 +37,6 @@ def get_public_key():
     # print(PUBLIC_KEY)
     response = {
         "public_key": pack_k(PUBLIC_KEY),
-        "private_key": pack_k(PRIVATE_KEY),
         "encoding": "base64"}
     # print(response)
     return response
