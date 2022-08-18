@@ -28,8 +28,8 @@ async def establish_connections_with_mixers():
         if name == mixer_name:
             continue
         try:
-            print(f"{xport} try connect to {mixer_name}")
-            async with websockets.connect(ip_by_name[mixer_name], ping_interval=2) as websocket:
+            print(f"{xport} try connect to {mixer_name, ip_by_name[mixer_name]}")
+            async with websockets.connect(ip_by_name[mixer_name]) as websocket:
                 # TODO only not connected.  TODO fix blocking connection atempt
                 await websocket.send(jp.encode(GreetingDto(name=name)))
                 raw = await websocket.recv()
@@ -74,10 +74,12 @@ async def register(websocket) -> MixerName:
 
 
 async def unregister(mixer_name: MixerName):  # TODO delete async?
+    print(f"unregister {mixer_name}")
     del socket_by_name[mixer_name]
 
 
 async def handle_existing_connection(websocket):
+    print(f"{xport} connections: {list(socket_by_name.keys())}")
     async for raw_message in websocket:
         message = jp.decode(raw_message)
         if type(message) is SecretMessageDto:
@@ -85,8 +87,10 @@ async def handle_existing_connection(websocket):
 
 
 async def handler(websocket):
+    print("HANDLER")
     mixer_name = await register(websocket)
     try:
+        print(f"registered {mixer_name}")
         await handle_existing_connection(websocket)
     finally:
         await unregister(mixer_name)
@@ -98,13 +102,23 @@ async def background_update():
         await asyncio.sleep(1)
 
 
-async def main(xport):
-    # task = asyncio.create_task(establish_connections_with_mixers())
-    task = asyncio.create_task(background_update())
-    await task  # не должен блокировать # TODO explicit return connections
-
+async def run_server():
     async with websockets.serve(handler, "localhost", xport):
         await asyncio.Future()  # run forever
+
+
+async def main(xport):
+    # task = asyncio.create_task(establish_connections_with_mixers())
+    # await task  # не должен блокировать # TODO explicit return connections
+    # async with websockets.serve(handler, "localhost", xport):
+    #     await task
+    #     await asyncio.Future()  # run forever
+    print("!")
+    task_bg = asyncio.create_task(background_update())
+    task_serv = asyncio.create_task(run_server())
+    await task_bg
+    print("?")
+    await task_serv
 
 
 if __name__ == '__main__':
