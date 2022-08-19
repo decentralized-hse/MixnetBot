@@ -3,7 +3,7 @@ from multiprocessing import Pool
 import time
 
 PORTS = [8001, 8002]
-# PORTS = list(range(8001, 8008))
+# PORTS = list(range(8001, 8020))
 
 
 def run_process(process):
@@ -17,5 +17,5 @@ def run_process(process):
 if __name__ == '__main__':
     processes = [f'{-1 + p % 8000}*python server.py --xport={p}' for p in PORTS]
 
-    pool = Pool(processes=8)
+    pool = Pool(processes=len(PORTS)+2)
     pool.map(run_process, processes)

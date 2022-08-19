@@ -6,7 +6,7 @@ import jsonpickle as jp
 import sys
 
 from Server.ConnectionManager import ConnectionManager, MixerConnection, ClientConnection
-from Server.Cryptographer import Cryptographer
+from Server.Cryptographer import Cryptographer, BoxAdapter
 from Server.DTOs.Message import RedirectMessageDto, FinalMessageDto
 from Server.DTOs.SecretMessage import SecretMessageDto
 from Server.Types import MixerName
@@ -62,16 +62,18 @@ async def handle_existing_connection(connection: Union[MixerConnection, ClientCo
         message = jp.decode(raw_message)
         if type(message) is SecretMessageDto:
             print("received secret message", message)
-            await handle_secret_message(message)
+            await handle_secret_message(message, connection)
 
 
-async def handle_secret_message(message: SecretMessageDto):
-    body = message.body  # decypher
-    dto = jp.decode(body)
+async def handle_secret_message(message: SecretMessageDto, connection: Union[MixerConnection, ClientConnection]):
+    decrypted: str = BoxAdapter.decrypt(connection.box, message.body)
+    dto = jp.decode(decrypted)
     print(f"{xport} decyphered. {dto}")
     if type(dto) is RedirectMessageDto:
-        websocket = connection_manager.get_ws_mixer_by_name(dto.to)
-        await websocket.send(jp.encode(SecretMessageDto(body=dto.body)))
+        mixer_conn = connection_manager.get_ws_mixer_by_name(dto.to)
+        websocket = mixer_conn.websocket
+        encrypted = BoxAdapter.encrypt(mixer_conn.box, dto.body)
+        await websocket.send(jp.encode(SecretMessageDto(body=encrypted)))
     if type(dto) is FinalMessageDto:
         print(f"{xport} FINAL. {dto}")
 

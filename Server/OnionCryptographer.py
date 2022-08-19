@@ -24,24 +24,24 @@ class OnionCryptographer:
         return SecretMessageDto(body=inner)
         # print(inner)
 
-    def old_encrypt(self, message: str, mixers: List[MixerName]) -> SecretMessageDto:
-        inner = FinalMessageDto(body=message)
-        # encrypt by recv_pub_k
-        for mixer in mixers[:-1]:
-            inner = RedirectMessageDto(body=jp.encode(inner), to=mixer)
-        inner = jp.encode(inner)
-        return SecretMessageDto(body=inner)
+    # def old_encrypt(self, message: str, mixers: List[MixerName]) -> SecretMessageDto:
+    #     inner = FinalMessageDto(body=message)
+    #     # encrypt by recv_pub_k
+    #     for mixer in mixers[:-1]:
+    #         inner = RedirectMessageDto(body=jp.encode(inner), to=mixer)
+    #     inner = jp.encode(inner)
+    #     return SecretMessageDto(body=inner)
 
 
 # r = OnionCryptographer().encrypt("ab", ["m1", "m2", "m3"])
 # pprint.pprint(r)
 # print(jp.decode(r).to)
 # 4306
-if __name__ == '__main__':
-    cryptographer = OnionCryptographer()
-    t = "Hi"
-    r = ["8002", "3"]
-    dto: SecretMessageDto = cryptographer.encrypt(t, r)
-    a = base64.b64decode(jp.decode(dto.body).body).decode()
-    print(a)
-    print(type(a))
+# if __name__ == '__main__':
+#     cryptographer = OnionCryptographer()
+#     t = "Hi"
+#     r = ["8002", "3"]
+#     dto: SecretMessageDto = cryptographer.encrypt(t, r)
+#     a = base64.b64decode(jp.decode(dto.body).body).decode()
+#     print(a)
+#     print(type(a))

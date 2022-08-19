@@ -37,8 +37,8 @@ class ConnectionManager:
         # TODO send ack?
         return created
 
-    def get_ws_mixer_by_name(self, name: MixerName) -> WebSocketCommonProtocol:
-        return self.connection_by_mixer_name[name].websocket
+    def get_ws_mixer_by_name(self, name: MixerName) -> MixerConnection:
+        return self.connection_by_mixer_name[name]
 
     #
     def unregister(self, connection: Union[MixerConnection, ClientConnection]):
