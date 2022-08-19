@@ -1,9 +1,11 @@
+from typing import Optional, Union
 import argparse
 import asyncio
 import json
 import jsonpickle as jp
 import sys
 
+from Server.ConnectionManager import ConnectionManager, MixerConnection, ClientConnection
 from Server.DTOs.Message import RedirectMessageDto, FinalMessageDto
 from Server.DTOs.SecretMessage import SecretMessageDto
 from Server.Types import MixerName
@@ -11,7 +13,7 @@ from Server.Types import MixerName
 sys.path.append('..')
 import websockets
 from sand import PORTS
-from Server.DTOs.Greeting import GreetingDto, GreetingResultDto
+from Server.DTOs.Greeting import GreetingDto, GreetingResultDto, ClientGreetingDto
 
 
 async def get_mixers():
@@ -30,20 +32,24 @@ async def establish_conn(mixer_name: MixerName, ip: str):
             raw = await websocket.recv()
             greet_result = jp.decode(raw)
             if greet_result.accepted:
-                socket_by_name[mixer_name] = websocket
+                connection = connection_manager.register_mixer(websocket, mixer_name)
                 try:
-                    await handle_existing_connection(websocket)
+                    await handle_existing_connection(connection)
                 finally:
-                    await unregister(mixer_name)
+                    connection_manager.unregister(connection)
     except ConnectionRefusedError:
         print(f"{xport} rejection", mixer_name)
+    print("*******")
 
 
 async def establish_connections_with_mixers():
     ip_by_name = await get_mixers()
     establishing_tasks = set()
+    connected = connection_manager.socket_by_mixer_name
+    print(f"{xport} cons: {[c for c in connection_manager.socket_by_mixer_name]}")
+
     for mixer_name in ip_by_name:
-        if SERVER_NAME == mixer_name:
+        if SERVER_NAME == mixer_name or mixer_name in connected:
             continue
         task = asyncio.create_task(establish_conn(mixer_name, ip=ip_by_name[mixer_name]))
         establishing_tasks.add(task)
@@ -69,38 +75,29 @@ async def establish_connections_with_mixers():
 #         return
 #     raise RuntimeError(f"Couldn't resend a message {mdto}")
 
-
-async def register(websocket) -> MixerName:
-    raw = await websocket.recv()
-    greeting = jp.decode(raw)
-    if type(greeting) is not GreetingDto:
-        raise ConnectionRefusedError("Wrong Greeting message")
-    socket_by_name[greeting.name] = websocket
-    await websocket.send(jp.encode(GreetingResultDto(accepted=True)))
-    return greeting.name
-
-
-async def unregister(mixer_name: MixerName):  # TODO delete async?
-    print(f"unregister {mixer_name}")
-    del socket_by_name[mixer_name]
-
-
-async def handle_existing_connection(websocket):
-    print(f"{xport} connections: {list(socket_by_name.keys())}")
-    async for raw_message in websocket:
+async def handle_existing_connection(connection: Union[MixerConnection, ClientConnection]):
+    async for raw_message in connection.websocket:
         message = jp.decode(raw_message)
         if type(message) is SecretMessageDto:
             print("received secret message", message)
 
 
 async def handler(websocket):
-    print(f"{xport} HANDLER")
-    mixer_name = await register(websocket)
+    raw = await websocket.recv()
+    greeting = jp.decode(raw)
+    if type(greeting) is GreetingDto:
+        await websocket.send(jp.encode(GreetingResultDto(accepted=True)))
+        connection = connection_manager.register_mixer(
+            websocket, greeting.name)
+    elif type(greeting) is ClientGreetingDto:
+        connection = await connection_manager.register_client(
+            websocket, greeting.pub_k)
+    else:
+        raise TypeError("Wrong Greeting")
     try:
-        print(f"{xport} registered {mixer_name}")
-        await handle_existing_connection(websocket)
+        await handle_existing_connection(connection)
     finally:
-        await unregister(mixer_name)
+        connection_manager.unregister(connection)
 
 
 async def background_update():
@@ -124,7 +121,6 @@ async def main(xport):
     task_bg = asyncio.create_task(background_update())
     task_serv = asyncio.create_task(run_server())
     await task_bg
-    print("?")
     await task_serv
 
 
@@ -134,5 +130,5 @@ if __name__ == '__main__':
     args = parser.parse_args()
     xport = args.xport
     SERVER_NAME = str(xport)
-    socket_by_name = {}
+    connection_manager = ConnectionManager()
     asyncio.run(main(xport))

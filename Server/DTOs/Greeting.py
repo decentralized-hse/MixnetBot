@@ -7,6 +7,10 @@ class GreetingDto(pydantic.BaseModel):
     name: str = ""  # name of sender
 
 
+class ClientGreetingDto(pydantic.BaseModel):
+    pub_k: str = ""  # pub_k of sender
+
+
 class GreetingResultDto(pydantic.BaseModel):
     accepted: bool = False
 
