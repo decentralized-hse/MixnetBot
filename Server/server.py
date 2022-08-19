@@ -6,6 +6,7 @@ import jsonpickle as jp
 import sys
 
 from Server.ConnectionManager import ConnectionManager, MixerConnection, ClientConnection
+from Server.Cryptographer import Cryptographer
 from Server.DTOs.Message import RedirectMessageDto, FinalMessageDto
 from Server.DTOs.SecretMessage import SecretMessageDto
 from Server.Types import MixerName
@@ -28,11 +29,11 @@ async def establish_conn(mixer_name: MixerName, ip: str):
     try:
         async with websockets.connect(ip) as websocket:
             # TODO only not connected.  TODO fix blocking connection atempt
-            await websocket.send(jp.encode(GreetingDto(name=SERVER_NAME)))
+            await websocket.send(jp.encode(GreetingDto(name=SERVER_NAME, pub_k=crypt.pub_k)))
             raw = await websocket.recv()
             greet_result = jp.decode(raw)
             if greet_result.accepted:
-                connection = connection_manager.register_mixer(websocket, mixer_name)
+                connection = connection_manager.register_mixer(websocket, mixer_name, greet_result.pub_k)
                 try:
                     await handle_existing_connection(connection)
                 finally:
@@ -75,15 +76,13 @@ async def handle_secret_message(message: SecretMessageDto):
         print(f"{xport} FINAL. {dto}")
 
 
-
-
 async def handler(websocket):
     raw = await websocket.recv()
     greeting = jp.decode(raw)
     if type(greeting) is GreetingDto:
-        await websocket.send(jp.encode(GreetingResultDto(accepted=True)))
+        await websocket.send(jp.encode(GreetingResultDto(accepted=True, pub_k=crypt.pub_k)))
         connection = connection_manager.register_mixer(
-            websocket, greeting.name)
+            websocket, greeting.name, greeting.pub_k)
     elif type(greeting) is ClientGreetingDto:
         connection = connection_manager.register_client(
             websocket, greeting.pub_k)
@@ -118,6 +117,7 @@ if __name__ == '__main__':
     parser.add_argument("--xport", dest="xport", default=5000, type=int)
     args = parser.parse_args()
     xport = args.xport
+    crypt = Cryptographer()
     SERVER_NAME = str(xport)
-    connection_manager = ConnectionManager()
+    connection_manager = ConnectionManager(crypt)
     asyncio.run(main())

@@ -1,8 +1,10 @@
+from nacl.public import PublicKey, Box
 from typing import NamedTuple, Optional, Union
 from abc import ABC, abstractmethod
 import jsonpickle as jp
 from websockets.legacy.protocol import WebSocketCommonProtocol
 
+from Server.Cryptographer import Cryptographer
 from Server.DTOs.Greeting import GreetingResultDto
 from Server.Types import MixerName
 
@@ -10,6 +12,7 @@ from Server.Types import MixerName
 class MixerConnection(NamedTuple):
     name: str
     websocket: WebSocketCommonProtocol
+    box: Box
 
 
 class ClientConnection(NamedTuple):
@@ -18,12 +21,13 @@ class ClientConnection(NamedTuple):
 
 
 class ConnectionManager:
-    def __init__(self):
+    def __init__(self, crypt: Cryptographer):
         self.connection_by_mixer_name = dict()
         self.socket_by_client_pub_k = dict()
+        self.crypt = crypt
 
-    def register_mixer(self, websocket, name: MixerName):
-        created = MixerConnection(name, websocket)
+    def register_mixer(self, websocket, name: MixerName, pub_k: PublicKey):
+        created = MixerConnection(name, websocket, self.crypt.get_box(interlocutor_pub_k=pub_k))
         self.connection_by_mixer_name[name] = created
         return created
 

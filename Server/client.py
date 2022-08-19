@@ -13,7 +13,7 @@ async def hello():
         async with websockets.connect("ws://localhost:8001") as websocket:
             await websocket.send(jp.encode(ClientGreetingDto()))
             cryptographer = OnionCryptographer()
-            dto: SecretMessageDto = cryptographer.encrypt("Hi", ["8002", "8001"])
+            dto: SecretMessageDto = cryptographer.encrypt("Hi", ["8002", "8001"] * 6)
             await websocket.send(jp.encode(dto))
 
             # msg = await websocket.recv()
