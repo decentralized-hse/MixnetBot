@@ -11,5 +11,5 @@ class RedirectMessageDto(pydantic.BaseModel):
 
 
 class FinalMessageDto(pydantic.BaseModel):
-    body: str
+    body: str  # зашифрованное
     recv_pub_k: str = ""

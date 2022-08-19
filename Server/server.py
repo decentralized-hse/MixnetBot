@@ -39,14 +39,13 @@ async def establish_conn(mixer_name: MixerName, ip: str):
                     connection_manager.unregister(connection)
     except ConnectionRefusedError:
         print(f"{xport} rejection", mixer_name)
-    print("*******")
 
 
 async def establish_connections_with_mixers():
     ip_by_name = await get_mixers()
     establishing_tasks = set()
-    connected = connection_manager.socket_by_mixer_name
-    print(f"{xport} cons: {[c for c in connection_manager.socket_by_mixer_name]}")
+    connected = connection_manager.connection_by_mixer_name
+    # print(f"{xport} cons: {[c for c in connection_manager.connection_by_mixer_name]}")
 
     for mixer_name in ip_by_name:
         if SERVER_NAME == mixer_name or mixer_name in connected:
@@ -55,31 +54,27 @@ async def establish_connections_with_mixers():
         establishing_tasks.add(task)
         task.add_done_callback(establishing_tasks.discard)
         print(f"{xport} try connect to {mixer_name, ip_by_name[mixer_name]}")
-    # print(f"{xport} Established", socket_by_name)
 
-
-# async def handle_message2(websocket, event: SecretMessageDto):
-#     mdto = jp.decode(event.body)
-#     # decrypted
-#     if type(mdto) is FinalMessageDto:
-#         print("FINAL")
-#         return  # save to db
-#     if type(mdto) is RedirectMessageDto:
-#         print("####")
-#         print(f"I am {xport}", mdto.to, socket_by_name)
-#         ws = socket_by_name.get(mdto.to)
-#         if not ws:
-#             raise KeyError(f"Couldn't find {mdto.to} in {list(socket_by_name.keys())}")
-#         await ws.send(mdto.body)
-#         print("resent")
-#         return
-#     raise RuntimeError(f"Couldn't resend a message {mdto}")
 
 async def handle_existing_connection(connection: Union[MixerConnection, ClientConnection]):
     async for raw_message in connection.websocket:
         message = jp.decode(raw_message)
         if type(message) is SecretMessageDto:
             print("received secret message", message)
+            await handle_secret_message(message)
+
+
+async def handle_secret_message(message: SecretMessageDto):
+    body = message.body  # decypher
+    dto = jp.decode(body)
+    print(f"{xport} decyphered. {dto}")
+    if type(dto) is RedirectMessageDto:
+        websocket = connection_manager.get_ws_mixer_by_name(dto.to)
+        await websocket.send(jp.encode(SecretMessageDto(body=dto.body)))
+    if type(dto) is FinalMessageDto:
+        print(f"{xport} FINAL. {dto}")
+
+
 
 
 async def handler(websocket):
@@ -90,7 +85,7 @@ async def handler(websocket):
         connection = connection_manager.register_mixer(
             websocket, greeting.name)
     elif type(greeting) is ClientGreetingDto:
-        connection = await connection_manager.register_client(
+        connection = connection_manager.register_client(
             websocket, greeting.pub_k)
     else:
         raise TypeError("Wrong Greeting")
@@ -111,13 +106,7 @@ async def run_server():
         await asyncio.Future()  # run forever
 
 
-async def main(xport):
-    # task = asyncio.create_task(establish_connections_with_mixers())
-    # await task  # не должен блокировать # TODO explicitly return connections
-    # async with websockets.serve(handler, "localhost", xport):
-    #     await task
-    #     await asyncio.Future()  # run forever
-    print("!")
+async def main():
     task_bg = asyncio.create_task(background_update())
     task_serv = asyncio.create_task(run_server())
     await task_bg
@@ -131,4 +120,4 @@ if __name__ == '__main__':
     xport = args.xport
     SERVER_NAME = str(xport)
     connection_manager = ConnectionManager()
-    asyncio.run(main(xport))
+    asyncio.run(main())

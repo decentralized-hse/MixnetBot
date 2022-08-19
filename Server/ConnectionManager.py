@@ -19,12 +19,12 @@ class ClientConnection(NamedTuple):
 
 class ConnectionManager:
     def __init__(self):
-        self.socket_by_mixer_name = dict()
+        self.connection_by_mixer_name = dict()
         self.socket_by_client_pub_k = dict()
 
     def register_mixer(self, websocket, name: MixerName):
         created = MixerConnection(name, websocket)
-        self.socket_by_mixer_name[name] = created
+        self.connection_by_mixer_name[name] = created
         return created
 
     def register_client(self, websocket, pub_k):
@@ -33,10 +33,13 @@ class ConnectionManager:
         # TODO send ack?
         return created
 
+    def get_ws_mixer_by_name(self, name: MixerName) -> WebSocketCommonProtocol:
+        return self.connection_by_mixer_name[name].websocket
+
     #
     def unregister(self, connection: Union[MixerConnection, ClientConnection]):
         if type(connection) is MixerConnection:
-            del self.socket_by_mixer_name[connection.name]
+            del self.connection_by_mixer_name[connection.name]
             return
         if type(connection) is ClientConnection:
             del self.socket_by_client_pub_k[connection.pub_k]
