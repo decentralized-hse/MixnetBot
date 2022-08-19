@@ -3,13 +3,13 @@ from multiprocessing import Pool
 import time
 
 PORTS = [8001, 8002]
-# ports = list(range(8001, 8008))
+# PORTS = list(range(8001, 8008))
 
 
 def run_process(process):
     p = process.split("*")
 
-    time.sleep(int(p[0]) * 5)
+    # time.sleep(int(p[0]) * 5)
     os.system(p[1])
     # time.sleep(5)
 

@@ -22,27 +22,34 @@ async def get_mixers():
     # ]
 
 
+async def establish_conn(mixer_name: MixerName, ip: str):
+    try:
+        async with websockets.connect(ip) as websocket:
+            # TODO only not connected.  TODO fix blocking connection atempt
+            await websocket.send(jp.encode(GreetingDto(name=SERVER_NAME)))
+            raw = await websocket.recv()
+            greet_result = jp.decode(raw)
+            if greet_result.accepted:
+                socket_by_name[mixer_name] = websocket
+                try:
+                    await handle_existing_connection(websocket)
+                finally:
+                    await unregister(mixer_name)
+    except ConnectionRefusedError:
+        print(f"{xport} rejection", mixer_name)
+
+
 async def establish_connections_with_mixers():
     ip_by_name = await get_mixers()
+    establishing_tasks = set()
     for mixer_name in ip_by_name:
-        if name == mixer_name:
+        if SERVER_NAME == mixer_name:
             continue
-        try:
-            print(f"{xport} try connect to {mixer_name, ip_by_name[mixer_name]}")
-            async with websockets.connect(ip_by_name[mixer_name]) as websocket:
-                # TODO only not connected.  TODO fix blocking connection atempt
-                await websocket.send(jp.encode(GreetingDto(name=name)))
-                raw = await websocket.recv()
-                greet_result = jp.decode(raw)
-                if greet_result.accepted:
-                    socket_by_name[mixer_name] = websocket
-                    try:
-                        await handle_existing_connection(websocket)
-                    finally:
-                        await unregister(mixer_name)
-        except ConnectionRefusedError:
-            print(f"{xport} rejection", mixer_name)
-    print(f"{xport} Established", socket_by_name)
+        task = asyncio.create_task(establish_conn(mixer_name, ip=ip_by_name[mixer_name]))
+        establishing_tasks.add(task)
+        task.add_done_callback(establishing_tasks.discard)
+        print(f"{xport} try connect to {mixer_name, ip_by_name[mixer_name]}")
+    # print(f"{xport} Established", socket_by_name)
 
 
 # async def handle_message2(websocket, event: SecretMessageDto):
@@ -87,10 +94,10 @@ async def handle_existing_connection(websocket):
 
 
 async def handler(websocket):
-    print("HANDLER")
+    print(f"{xport} HANDLER")
     mixer_name = await register(websocket)
     try:
-        print(f"registered {mixer_name}")
+        print(f"{xport} registered {mixer_name}")
         await handle_existing_connection(websocket)
     finally:
         await unregister(mixer_name)
@@ -109,7 +116,7 @@ async def run_server():
 
 async def main(xport):
     # task = asyncio.create_task(establish_connections_with_mixers())
-    # await task  # не должен блокировать # TODO explicit return connections
+    # await task  # не должен блокировать # TODO explicitly return connections
     # async with websockets.serve(handler, "localhost", xport):
     #     await task
     #     await asyncio.Future()  # run forever
@@ -126,6 +133,6 @@ if __name__ == '__main__':
     parser.add_argument("--xport", dest="xport", default=5000, type=int)
     args = parser.parse_args()
     xport = args.xport
-    name = str(xport)
+    SERVER_NAME = str(xport)
     socket_by_name = {}
     asyncio.run(main(xport))
