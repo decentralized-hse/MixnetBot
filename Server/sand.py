@@ -1,21 +1,11 @@
-import os
-from multiprocessing import Pool
-import time
+from typing import List, Union
 
-PORTS = [8001, 8002]
-# PORTS = list(range(8001, 8020))
+from typeguard import typechecked
 
 
-def run_process(process):
-    p = process.split("*")
-
-    # time.sleep(int(p[0]) * 5)
-    os.system(p[1])
-    # time.sleep(5)
-
-
-if __name__ == '__main__':
-    processes = [f'{-1 + p % 8000}*python server.py --xport={p}' for p in PORTS]
-
-    pool = Pool(processes=len(PORTS)+2)
-    pool.map(run_process, processes)
+#
+@typechecked
+def some_function(a: int) -> bool:
+    a: int = "2"
+    return True
+some_function(1)

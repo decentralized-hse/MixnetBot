@@ -8,11 +8,18 @@ import jsonpickle as jp
 
 from Server.DTOs.SecretMessage import SecretMessageDto
 from Server.Types import MixerName
+from nacl.public import PrivateKey, PublicKey, Box
+from nacl.utils import EncryptedMessage
 
 
 class OnionCryptographer:
     def __init__(self):
-        pass
+        self.priv_k = PrivateKey.generate()
+        self.pub_k = self.priv_k.public_key
+        self.pub_name = "Default pub_name"# TODO generate?
+
+    def get_box(self, interlocutor_pub_k: PublicKey):
+        return Box(self.priv_k, interlocutor_pub_k)
 
     def encrypt(self, message: str, mixers: List[MixerName]) -> SecretMessageDto:
         inner = FinalMessageDto(body=message)
@@ -31,7 +38,6 @@ class OnionCryptographer:
     #         inner = RedirectMessageDto(body=jp.encode(inner), to=mixer)
     #     inner = jp.encode(inner)
     #     return SecretMessageDto(body=inner)
-
 
 # r = OnionCryptographer().encrypt("ab", ["m1", "m2", "m3"])
 # pprint.pprint(r)

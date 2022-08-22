@@ -13,7 +13,7 @@ from Server.Types import MixerName
 
 sys.path.append('..')
 import websockets
-from sand import PORTS
+from launcher import PORTS
 from Server.DTOs.Greeting import GreetingDto, GreetingResultDto, ClientGreetingDto
 
 
@@ -45,7 +45,7 @@ async def establish_conn(mixer_name: MixerName, ip: str):
 async def establish_connections_with_mixers():
     ip_by_name = await get_mixers()
     establishing_tasks = set()
-    connected = connection_manager.connection_by_mixer_name
+    connected = connection_manager.conn_by_mixer_name
     # print(f"{xport} cons: {[c for c in connection_manager.connection_by_mixer_name]}")
 
     for mixer_name in ip_by_name:
@@ -86,8 +86,9 @@ async def handler(websocket):
         connection = connection_manager.register_mixer(
             websocket, greeting.name, greeting.pub_k)
     elif type(greeting) is ClientGreetingDto:
-        connection = connection_manager.register_client(
-            websocket, greeting.pub_k)
+        await websocket.send(jp.encode(GreetingResultDto(accepted=True, pub_k=crypt.pub_k)))
+        connection = connection_manager.register_client(greeting.pub_name,
+                                                        websocket, greeting.pub_k)
     else:
         raise TypeError("Wrong Greeting")
     try:

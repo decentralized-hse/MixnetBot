@@ -13,7 +13,11 @@ class GreetingDto(pydantic.BaseModel):
 
 
 class ClientGreetingDto(pydantic.BaseModel):
-    pub_k: str = ""  # pub_k of sender
+    pub_name: str
+    pub_k: PublicKey
+
+    class Config:
+        arbitrary_types_allowed = True
 
 
 class GreetingResultDto(pydantic.BaseModel):
